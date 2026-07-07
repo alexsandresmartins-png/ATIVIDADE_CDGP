@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Gastos Parlamentares para Cidadãos</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js para visualizações dinâmicas e responsivas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Tela de Carregamento Inicial -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Carregando dados de transparência...</div>
+    <div style="font-size: 0.85rem; color: var(--text-light); max-width: 300px; text-align: center;">
+      Isso pode levar alguns segundos, pois estamos processando toda a base de dados da ALECE diretamente no seu navegador.
+    </div>
+  </div>
+
+  <!-- Cabeçalho Principal -->
+  <header class="header-wrapper">
+    <div class="container header-container">
+      <div class="header-tag">Transparência Pública</div>
+      <h1 class="header-title">Transparência dos Gastos Parlamentares</h1>
+      <p class="header-subtitle">
+        Consulte quem gastou, com quem gastou e como os gastos evoluíram ao longo do tempo. Veja de forma clara e simples como os recursos públicos são utilizados pelos deputados.
+      </p>
+    </div>
+  </header>
+
+  <main class="container">
+    
+    <!-- Mensagem Curta de Instrução -->
+    <div class="intro-card">
+      <!-- Ícone de Dica/Info -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <span>
+        <strong>Como usar:</strong> Use os filtros abaixo para consultar os gastos por <strong>PARTIDO</strong>, <strong>DEPUTADO</strong>, <strong>NATUREZA DE DESPESA</strong>, <strong>CREDOR</strong> e <strong>PERÍODO</strong>. O painel se atualiza instantaneamente.
+      </span>
+    </div>
+
+    <!-- Seção de Filtros Globais -->
+    <section class="filters-section">
+      <div class="filters-header">
+        <h2 class="filters-title">
+          <!-- Ícone de Filtro -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          Filtros de Pesquisa
+        </h2>
+        <button id="btn-limpar" class="btn-clear" disabled>
+          <!-- Ícone de Lixeira -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          Limpar Filtros
+        </button>
+      </div>
+      
+      <div class="filters-grid">
+        <!-- Partido -->
+        <div class="filter-group">
+          <label for="filter-partido" class="filter-label">Partido</label>
+          <select id="filter-partido" class="filter-select">
+            <option value="">Todos os Partidos</option>
+          </select>
+        </div>
+        
+        <!-- Deputado -->
+        <div class="filter-group">
+          <label for="filter-deputado" class="filter-label">Deputado(a)</label>
+          <select id="filter-deputado" class="filter-select">
+            <option value="">Todos os Deputados</option>
+          </select>
+        </div>
+        
+        <!-- Natureza de Despesa -->
+        <div class="filter-group">
+          <label for="filter-natureza" class="filter-label">Natureza de Despesa</label>
+          <select id="filter-natureza" class="filter-select">
+            <option value="">Todas as Naturezas</option>
+          </select>
+        </div>
+        
+        <!-- Credor -->
+        <div class="filter-group">
+          <label for="filter-credor" class="filter-label">Quem Recebeu (Credor)</label>
+          <select id="filter-credor" class="filter-select">
+            <option value="">Todos os Recebedores</option>
+          </select>
+        </div>
+        
+        <!-- Período -->
+        <div class="filter-group">
+          <label for="filter-periodo" class="filter-label">Mês de Referência</label>
+          <select id="filter-periodo" class="filter-select">
+            <option value="">Todos os Meses</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cartões de Resumo (KPIs) -->
+    <section class="summary-grid">
+      <!-- Total Gasto -->
+      <div class="kpi-card">
+        <div class="kpi-icon kpi-icon-total">
+          <!-- Ícone Dinheiro -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-title">Valor total gasto</span>
+          <span id="kpi-total-gasto" class="kpi-value">R$ 0,00</span>
+        </div>
+      </div>
+
+      <!-- Quantidade de Despesas -->
+      <div class="kpi-card">
+        <div class="kpi-icon kpi-icon-qty">
+          <!-- Ícone Recibo -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-title">Quantidade de despesas</span>
+          <span id="kpi-qtd-despesas" class="kpi-value">0</span>
+        </div>
+      </div>
+
+      <!-- Quantidade de Deputados -->
+      <div class="kpi-card">
+        <div class="kpi-icon kpi-icon-deps">
+          <!-- Ícone Usuários -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-title">Deputados no resultado</span>
+          <span id="kpi-qtd-deputados" class="kpi-value">0</span>
+        </div>
+      </div>
+
+      <!-- Quantidade de Credores -->
+      <div class="kpi-card">
+        <div class="kpi-icon kpi-icon-credores">
+          <!-- Ícone Prédio Comercial -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+            <line x1="9" y1="22" x2="9" y2="16"></line>
+            <line x1="15" y1="22" x2="15" y2="16"></line>
+            <line x1="9" y1="16" x2="15" y2="16"></line>
+            <path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01M12 6h.01M12 10h.01"></path>
+          </svg>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-title">Quem recebeu recursos</span>
+          <span id="kpi-qtd-credores" class="kpi-value">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção de Gráficos -->
+    <section>
+      <!-- Gráfico 1: Evolução Temporal (Linha) -->
+      <div class="chart-card" style="margin-bottom: 1.5rem;">
+        <div class="chart-header">
+          <div class="chart-title-group">
+            <h3 id="chart-evolucao-titulo" class="chart-title">Gastos mensais nos últimos 12 meses</h3>
+            <p class="chart-subtitle">Demonstração da soma das despesas mês a mês para o grupo selecionado.</p>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-evolucao"></canvas>
+        </div>
+      </div>
+
+      <!-- Gráficos de Pizza/Alternância (Top 10) -->
+      <div class="charts-grid-split">
+        <!-- Gráfico 2: Credor (Pizza) -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title-group">
+              <h3 class="chart-title">Quem mais recebeu recursos</h3>
+              <p class="chart-subtitle">As 10 empresas ou pessoas que mais receberam verba dos deputados.</p>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-credores"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico 3: Tipo de Despesa / Deputado (Pizza com Alternador) -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title-group">
+              <h3 id="chart-despesas-titulo" class="chart-title">Em que o dinheiro foi gasto</h3>
+              <p id="chart-despesas-subtitulo" class="chart-subtitle">Os 10 maiores tipos de gasto somados.</p>
+            </div>
+            <button id="btn-toggle-despesas" class="chart-toggle-btn" data-mode="tipo">
+              Ver por Deputado
+            </button>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-despesas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabela Detalhada com os Dados -->
+    <section class="table-section" style="margin-top: 1.5rem;">
+      <div class="table-header-wrapper">
+        <div>
+          <h2 class="filters-title" style="margin-bottom: 0.25rem;">
+            <!-- Ícone de Tabela -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="3" y1="15" x2="21" y2="15"></line>
+              <line x1="10" y1="9" x2="10" y2="21"></line>
+            </svg>
+            Detalhamento das Despesas
+          </h2>
+          <p class="chart-subtitle" style="font-size: 0.85rem;">Lista de todas as notas fiscais e gastos registrados com base nos filtros atuais.</p>
+        </div>
+
+        <!-- Barra de pesquisa da tabela -->
+        <div class="search-wrapper">
+          <span class="search-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input type="text" id="table-search" class="search-input" placeholder="Buscar credor, deputado, CNPJ...">
+        </div>
+      </div>
+
+      <!-- Tabela em si -->
+      <div class="table-responsive">
+        <table id="data-table">
+          <thead>
+            <tr>
+              <th data-column="DEPUTADO" class="col-deputado">Deputado(a) <span class="sort-indicator">↕</span></th>
+              <th data-column="PARTIDO" class="col-partido">Partido <span class="sort-indicator">↕</span></th>
+              <th data-column="CREDOR">Quem Recebeu (Credor) <span class="sort-indicator">↕</span></th>
+              <th data-column="NATUREZA DE DESPESA">Tipo de Gasto <span class="sort-indicator">↕</span></th>
+              <th data-column="PERIODO" style="text-align: center;">Mês <span class="sort-indicator">↕</span></th>
+              <th data-column="VALOR" class="col-valor">Valor (R$) <span class="sort-indicator">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- As linhas serão inseridas aqui dinamicamente -->
+          </tbody>
+        </table>
+        
+        <!-- Estado Vazio (Sem resultados) -->
+        <div id="table-empty-state" class="empty-state" style="display: none;">
+          <div class="empty-state-title">Nenhum gasto encontrado</div>
+          <div class="empty-state-desc">Tente alterar os filtros no topo da página ou limpar a pesquisa para encontrar o que procura.</div>
+        </div>
+      </div>
+
+      <!-- Controles de Paginação -->
+      <div class="pagination-wrapper">
+        <div id="pagination-info" class="pagination-info">
+          Mostrando 0 a 0 de 0 despesas
+        </div>
+        <div id="pagination-buttons" class="pagination-buttons">
+          <!-- Botões gerados dinamicamente -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Rodapé -->
+    <footer class="footer">
+      <p>Dados originários da Assembleia Legislativa do Estado do Ceará (ALECE) - Relatório Financeiro 2025.</p>
+      <p style="margin-top: 0.25rem;">Painel estático, transparente e de código aberto desenvolvido para o cidadão comum.</p>
+    </footer>
+
+  </main>
+
+  <!-- Lógica Principal -->
+  <script src="app.js"></script>
+</body>
+</html>
