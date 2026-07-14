@@ -223,7 +223,7 @@ body {
 /* Cartões de Resumo (KPIs) */
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
   gap: 1.25rem;
   margin-bottom: 2rem;
 }
@@ -232,11 +232,12 @@ body {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 1.5rem;
+  padding: 1.25rem 1.25rem 1.25rem 0.8rem; /* Ícone 3mm para a esquerda */
   box-shadow: var(--shadow-sm);
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1rem; /* Reduzido para dar mais espaço à direita */
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
@@ -638,3 +639,207 @@ tr:hover td {
 .footer a:hover {
   text-decoration: underline;
 }
+
+/* Controles de Tabela e Botões de Exportação */
+.table-controls-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+@media(min-width: 768px) {
+  .table-controls-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    width: auto;
+  }
+}
+
+.export-buttons-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family);
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-export svg {
+  flex-shrink: 0;
+}
+
+.btn-export:hover {
+  background-color: var(--bg-primary);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-pdf:hover {
+  background-color: var(--danger-light);
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
+.btn-csv:hover {
+  background-color: var(--accent-light);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+/* Regras de Impressão de PDF */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    font-size: 9pt !important;
+  }
+
+  .header-wrapper {
+    background: none !important;
+    color: #000000 !important;
+    border-bottom: 2px solid #000000 !important;
+    padding: 1.5rem 0 !important;
+    box-shadow: none !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .header-tag {
+    border: 1px solid #000000 !important;
+    color: #000000 !important;
+    background: none !important;
+  }
+
+  .header-subtitle {
+    color: #334155 !important;
+  }
+
+  /* Esconder elementos de controle interativos */
+  .intro-card, 
+  .filters-section,
+  .table-controls-container,
+  .pagination-wrapper,
+  #btn-toggle-despesas,
+  .footer,
+  .loading-overlay,
+  .btn-clear {
+    display: none !important;
+  }
+
+  .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Exibir grade de KPIs impressa de forma compacta */
+  .summary-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.5rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .kpi-card {
+    flex-direction: row !important;
+    align-items: center !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 0.5rem 0.75rem !important;
+    box-shadow: none !important;
+    background-color: #ffffff !important;
+  }
+
+  .kpi-icon {
+    display: none !important;
+  }
+
+  .kpi-title {
+    font-size: 0.75rem !important;
+  }
+
+  .kpi-value {
+    font-size: 1.15rem !important;
+    margin-top: 0 !important;
+  }
+
+  /* Visualização de Gráficos na Impressão */
+  .charts-grid-split {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+    page-break-inside: avoid;
+  }
+
+  .chart-card {
+    border: 1px solid #cbd5e1 !important;
+    padding: 0.75rem !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    background-color: #ffffff !important;
+  }
+
+  .chart-container {
+    min-height: 220px !important;
+    height: 220px !important;
+  }
+
+  /* Tabela de despesas inteira visível */
+  .table-section {
+    border: none !important;
+    padding: 0 !important;
+    margin-top: 1.5rem !important;
+    box-shadow: none !important;
+  }
+
+  .table-responsive {
+    overflow: visible !important;
+    border: none !important;
+  }
+
+  table {
+    width: 100% !important;
+    border: 1px solid #000000 !important;
+    font-size: 7.5pt !important;
+    border-collapse: collapse !important;
+  }
+
+  th {
+    background-color: #f1f5f9 !important;
+    color: #000000 !important;
+    border-bottom: 2px solid #000000 !important;
+    font-weight: bold !important;
+  }
+
+  td, th {
+    padding: 0.4rem 0.5rem !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    white-space: normal !important; /* Permitir quebra de texto para tabelas longas */
+  }
+
+  .col-valor {
+    white-space: nowrap !important;
+  }
+
+  /* Evitar quebras ruins no meio de elementos */
+  .chart-card, .table-section, tr {
+    page-break-inside: avoid;
+  }
+}
+

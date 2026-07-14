@@ -173,7 +173,7 @@
           </svg>
         </div>
         <div class="kpi-info">
-          <span class="kpi-title">Quem recebeu recursos</span>
+          <span class="kpi-title">Quantitativo de credores</span>
           <span id="kpi-qtd-credores" class="kpi-value">0</span>
         </div>
       </div>
@@ -200,7 +200,7 @@
         <div class="chart-card">
           <div class="chart-header">
             <div class="chart-title-group">
-              <h3 class="chart-title">Quem mais recebeu recursos</h3>
+              <h3 class="chart-title">Qual credor mais recebeu recursos</h3>
               <p class="chart-subtitle">As 10 empresas ou pessoas que mais receberam verba dos deputados.</p>
             </div>
           </div>
@@ -241,18 +241,41 @@
             </svg>
             Detalhamento das Despesas
           </h2>
-          <p class="chart-subtitle" style="font-size: 0.85rem;">Lista de todas as notas fiscais e gastos registrados com base nos filtros atuais.</p>
+          <p class="chart-subtitle" style="font-size: 0.85rem;">Lista de todos os empenhos e gastos registrados com base nos filtros atuais.</p>
         </div>
 
-        <!-- Barra de pesquisa da tabela -->
-        <div class="search-wrapper">
-          <span class="search-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-          </span>
-          <input type="text" id="table-search" class="search-input" placeholder="Buscar credor, deputado, CNPJ...">
+        <!-- Controles da Tabela (Exportações e Busca) -->
+        <div class="table-controls-container">
+          <div class="export-buttons-group">
+            <button id="btn-export-pdf" class="btn-export btn-pdf" title="Gerar Relatório em PDF com todos os dados filtrados">
+              <!-- Ícone de Impressora -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9V2h12v7"></path>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+              </svg>
+              Gerar PDF
+            </button>
+            <button id="btn-export-csv" class="btn-export btn-csv" title="Baixar planilha CSV com todos os dados filtrados">
+              <!-- Ícone de Tabela / Planilha -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Exportar CSV
+            </button>
+          </div>
+
+          <div class="search-wrapper">
+            <span class="search-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
+            <input type="text" id="table-search" class="search-input" placeholder="Buscar por credor, deputado, empenho, CNPJ...">
+          </div>
         </div>
       </div>
 
@@ -264,7 +287,11 @@
               <th data-column="DEPUTADO" class="col-deputado">Deputado(a) <span class="sort-indicator">↕</span></th>
               <th data-column="PARTIDO" class="col-partido">Partido <span class="sort-indicator">↕</span></th>
               <th data-column="CREDOR">Quem Recebeu (Credor) <span class="sort-indicator">↕</span></th>
+              <th data-column="CNPJ">CNPJ <span class="sort-indicator">↕</span></th>
+              <th data-column="EMPENHO">Empenho <span class="sort-indicator">↕</span></th>
+              <th data-column="DESCRICAO">Descrição <span class="sort-indicator">↕</span></th>
               <th data-column="NATUREZA DE DESPESA">Tipo de Gasto <span class="sort-indicator">↕</span></th>
+              <th data-column="TIPO DE DESPESA">Tipo de Despesa <span class="sort-indicator">↕</span></th>
               <th data-column="PERIODO" style="text-align: center;">Mês <span class="sort-indicator">↕</span></th>
               <th data-column="VALOR" class="col-valor">Valor (R$) <span class="sort-indicator">↕</span></th>
             </tr>

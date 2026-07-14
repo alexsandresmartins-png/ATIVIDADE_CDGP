@@ -255,6 +255,10 @@ function setupEventListeners() {
     renderTable();
   });
 
+  // Botões de Exportação
+  document.getElementById("btn-export-pdf").addEventListener("click", exportToPDF);
+  document.getElementById("btn-export-csv").addEventListener("click", exportToCSV);
+
   // Alternância no Gráfico 3 (Gasto por Tipo / Deputado)
   document.getElementById("btn-toggle-despesas").addEventListener("click", toggleChartDespesasMode);
   
@@ -389,7 +393,7 @@ function updateSummaryCards() {
 }
 
 // Tabela de Apoio
-function renderTable() {
+function renderTable(showAll = false) {
   const tbody = document.getElementById("table-body");
   const emptyState = document.getElementById("table-empty-state");
   const searchInput = document.getElementById("table-search");
@@ -403,9 +407,11 @@ function renderTable() {
       return d.deputado.toLowerCase().includes(query) ||
              d.partido.toLowerCase().includes(query) ||
              d.credor.toLowerCase().includes(query) ||
-             d.natureza.toLowerCase().includes(query) ||
              d.cnpj.includes(query) ||
-             d.empenho.toLowerCase().includes(query);
+             d.empenho.toLowerCase().includes(query) ||
+             d.descricao.toLowerCase().includes(query) ||
+             d.natureza.toLowerCase().includes(query) ||
+             d.tipoDespesa.toLowerCase().includes(query);
     });
   }
   
@@ -420,8 +426,16 @@ function renderTable() {
         valA = a.partido; valB = b.partido; break;
       case "CREDOR":
         valA = a.credor; valB = b.credor; break;
+      case "CNPJ":
+        valA = a.cnpj; valB = b.cnpj; break;
+      case "EMPENHO":
+        valA = a.empenho; valB = b.empenho; break;
+      case "DESCRICAO":
+        valA = a.descricao; valB = b.descricao; break;
       case "NATUREZA DE DESPESA":
         valA = a.natureza; valB = b.natureza; break;
+      case "TIPO DE DESPESA":
+        valA = a.tipoDespesa; valB = b.tipoDespesa; break;
       case "PERIODO":
         valA = a.periodoChave; valB = b.periodoChave; break;
       case "VALOR":
@@ -441,17 +455,26 @@ function renderTable() {
     return 0;
   });
   
-  // 3. Paginação
+  // 3. Paginação (Bypassada se showAll = true para impressão)
   const totalItems = tableData.length;
   const totalPages = Math.ceil(totalItems / tablePerPage) || 1;
   
-  // Garantir que a página atual não ultrapasse o limite
-  if (tablePage > totalPages) tablePage = totalPages;
-  if (tablePage < 1) tablePage = 1;
+  let pageData;
+  let startIndex, endIndex;
   
-  const startIndex = (tablePage - 1) * tablePerPage;
-  const endIndex = Math.min(startIndex + tablePerPage, totalItems);
-  const pageData = tableData.slice(startIndex, endIndex);
+  if (showAll) {
+    pageData = tableData;
+    startIndex = 0;
+    endIndex = totalItems;
+  } else {
+    // Garantir que a página atual não ultrapasse o limite
+    if (tablePage > totalPages) tablePage = totalPages;
+    if (tablePage < 1) tablePage = 1;
+    
+    startIndex = (tablePage - 1) * tablePerPage;
+    endIndex = Math.min(startIndex + tablePerPage, totalItems);
+    pageData = tableData.slice(startIndex, endIndex);
+  }
   
   // Limpar tabela
   tbody.innerHTML = "";
@@ -475,8 +498,12 @@ function renderTable() {
           ${item.partido}
         </span>
       </td>
-      <td title="CNPJ: ${item.cnpj}">${item.credor}</td>
+      <td>${item.credor}</td>
+      <td style="white-space: nowrap;">${item.cnpj}</td>
+      <td>${item.empenho}</td>
+      <td title="${item.descricao}">${item.descricao.length > 60 ? item.descricao.substring(0, 57) + "..." : item.descricao}</td>
       <td>${formatName(item.natureza).replace("Dep. ", "")}</td>
+      <td>${item.tipoDespesa}</td>
       <td style="text-align: center; white-space: nowrap;">${item.periodoTexto.replace(" de ", "/")}</td>
       <td class="col-valor">${formatCurrency(item.valor)}</td>
     `;
@@ -484,10 +511,13 @@ function renderTable() {
   });
   
   // Atualizar texto de paginação
-  document.getElementById("pagination-info").textContent = `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems.toLocaleString("pt-BR")} despesas`;
-  
-  // Renderizar botões de paginação
-  renderPaginationButtons(totalPages);
+  if (showAll) {
+    document.getElementById("pagination-info").textContent = `Mostrando todos os ${totalItems.toLocaleString("pt-BR")} registros (Pronto para Impressão)`;
+    document.getElementById("pagination-buttons").innerHTML = "";
+  } else {
+    document.getElementById("pagination-info").textContent = `Mostrando ${startIndex + 1} a ${endIndex} de ${totalItems.toLocaleString("pt-BR")} despesas`;
+    renderPaginationButtons(totalPages);
+  }
 }
 
 function renderPaginationButtons(totalPages) {
@@ -883,4 +913,68 @@ function toggleChartDespesasMode() {
     btn.textContent = "Ver por Deputado";
   }
   renderDespesasChart();
+}
+
+// -------------------------------------------------------------
+// 7. Recursos de Exportação (PDF e CSV)
+// -------------------------------------------------------------
+function exportToPDF() {
+  // 1. Mostrar tabela inteira sem paginação
+  renderTable(true);
+  
+  // 2. Chamar o diálogo de impressão nativo após pequena pausa para renderizar o DOM
+  setTimeout(() => {
+    window.print();
+    
+    // 3. Restaurar a tabela paginada original após imprimir/fechar diálogo
+    renderTable(false);
+  }, 350);
+}
+
+function exportToCSV() {
+  if (filteredData.length === 0) {
+    alert("Não há registros com os filtros atuais para exportação.");
+    return;
+  }
+  
+  // Codificação especial UTF-8 BOM (\uFEFF) para garantir caracteres em português no Excel
+  let csv = "\uFEFF";
+  
+  // Cabeçalhos (Ponto e vírgula como separador oficial no formato regional PT-BR)
+  csv += "Deputado(a);Partido;Quem Recebeu (Credor);CNPJ;Empenho;Descrição;Tipo de Gasto (Natureza);Tipo de Despesa;Mês;Valor (R$)\n";
+  
+  // Iterar dados filtrados atuais
+  filteredData.forEach(item => {
+    // Tratar campos de texto para evitar quebras de linhas ou aspas problemáticas no CSV
+    const descTratada = item.descricao
+      .replace(/"/g, '""')
+      .replace(/\r?\n|\r/g, " ");
+      
+    const row = [
+      formatName(item.deputado),
+      item.partido,
+      item.credor,
+      `"${item.cnpj}"`, // Aspas duplas forçam leitura como texto no Excel preservando CNPJ
+      item.empenho,
+      `"${descTratada}"`,
+      formatName(item.natureza).replace("Dep. ", ""),
+      item.tipoDespesa,
+      item.periodoTexto,
+      item.valor.toFixed(2).replace(".", ",") // Formatação regional com vírgula para centavos
+    ];
+    csv += row.join(";") + "\n";
+  });
+  
+  // Trigger do download do blob
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  
+  link.setAttribute("href", url);
+  link.setAttribute("download", `relatorio_despesas_parlamentares_${new Date().toISOString().slice(0, 10)}.csv`);
+  link.style.visibility = "hidden";
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
